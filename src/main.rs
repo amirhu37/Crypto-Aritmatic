@@ -2,6 +2,9 @@ use itertools::Itertools;
 use std::process::Command;
 use std::collections::HashSet;
 
+
+
+/// you can add a massage to show as a hint 
 #[macro_export]
 macro_rules! input {
     ( $input_type:ty ) => {
@@ -31,7 +34,14 @@ macro_rules! input {
         }
     }};
 }
-// Helper function to convert a word to its numerical value based on current assignment
+
+
+/// ## word_to_number
+/// ### inputs : 
+///          word : &str = the word 
+///          mapping : &[(char, u32)] = tuple of chr and it's number 
+/// ----
+/// Helper function to convert a word to its numerical value based on current assignment
 fn word_to_number(word: &str, mapping: &[(char, u32)]) -> u32 {
     let mut number: u32 = 0;
     for c in word.chars() {
@@ -41,13 +51,28 @@ fn word_to_number(word: &str, mapping: &[(char, u32)]) -> u32 {
     number
 }
 
-// Function to check if current mapping satisfies the puzzle
+/// ## is_valid_solution
+/// ### inputs : 
+///         words: &Vec<String> = the word 
+///         result: &String = the Result Word
+///         mapping : &[(char, u32)] = tuple of chr and it's number 
+/// ### output :
+///         boolean that check if the solution valid
+/// ---
+/// Function to check if current mapping satisfies the puzzle
 fn is_valid_solution(words: &Vec<String>, result: &String, mapping: &[(char, u32)]) -> bool {
     let sum: u32 = words.iter().map(|word| word_to_number(word.as_str(), mapping)).sum();
     sum == word_to_number(result, mapping)
 }
 
-// Function to generate permutations of digits and find a valid solution
+/// ## solve_crypto_arithmetic
+/// #### inputs : 
+///         words: &Vec<String> = the word 
+///         result: &String = the Result Word
+/// #### output :
+///     tuple of (chr , index)
+/// ---
+/// Function to generate permutations of digits and find a valid solution
 fn solve_crypto_arithmetic(words: Vec<String>, result: String) -> Option<Vec<(char, u32)>> {
     let mut letters: HashSet<char> = HashSet::new();
     for word in words.iter().chain(std::iter::once(&result)) {
@@ -55,8 +80,8 @@ fn solve_crypto_arithmetic(words: Vec<String>, result: String) -> Option<Vec<(ch
             letters.insert(c);
         }
     }
-
     let letters: Vec<char> = letters.into_iter().collect();
+    // check if there is more than 10 letter. then we are sure there won't solution
     if letters.len() > 10 {
         return None; // More than 10 unique letters, no solution possible with single digits
     }
@@ -74,6 +99,12 @@ fn solve_crypto_arithmetic(words: Vec<String>, result: String) -> Option<Vec<(ch
 }
 
 
+
+/// #### output:
+///     first a vector of two word
+///     second a string thst is output
+/// ---
+/// helper for get 3 words for processes
 fn inputs() -> (Vec<String>, String) {
     let input1: String = input!("Two Words as Input, Separated with Whitespace? ");
     let words: Vec<String> = input1.split_whitespace().map(String::from).collect();
@@ -83,6 +114,9 @@ fn inputs() -> (Vec<String>, String) {
     (words, result)
 }
 
+
+/// just for cleaning Terminal 
+/// Work only for Windows
 fn cls() {
     Command::new("cmd")
         .args(&["/C", "cls"])
@@ -92,10 +126,11 @@ fn cls() {
 
 fn main() {
     cls();
+    // get input words
     let ( words, result) = inputs();
-
+    // Print what we got as String Words
     println!("{} + {} = {}", words[0], words[1], result);
-
+    // get solution
     match solve_crypto_arithmetic(words, result) {
         Some(mapping) => {
             // Extract characters and form a string
