@@ -13,7 +13,7 @@ macro_rules! input {
     };
 
     (  $msg:expr ) => {
-        input!(String, $msg);
+        input!(String, $msg)
     };
 
     ( $input_type:ty, $msg:expr ) => {{
