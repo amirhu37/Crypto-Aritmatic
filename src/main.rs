@@ -1,6 +1,35 @@
 use itertools::Itertools;
 use std::collections::HashSet;
 
+#[macro_export]
+macro_rules! input {
+    ( $input_type:ty ) => {
+        input!($input_type, "");
+    };
+
+    ( ) => {
+        input!(String, "");
+    };
+
+    (  $msg:expr ) => {
+        input!(String, $msg);
+    };
+
+    ( $input_type:ty, $msg:expr ) => {{
+        use std::io::{self, Write};
+        print!("{}", $msg  );
+        io::stdout().flush().unwrap();
+        let mut user_input = String::new();
+        std::io::stdin()
+            .read_line(&mut user_input)
+            .expect("Failed to read input");
+        let trimmed_input = user_input.trim().to_string();
+        match trimmed_input.parse::<$input_type>() {
+            Ok(r) => r,
+            Err(error) => panic!("Cannot parse: {:?}", error),
+        }
+    }};
+}
 // Helper function to convert a word to its numerical value based on current assignment
 fn word_to_number(word: &str, mapping: &[(char, u32)]) -> u32 {
     let mut number: u32 = 0;
@@ -12,15 +41,15 @@ fn word_to_number(word: &str, mapping: &[(char, u32)]) -> u32 {
 }
 
 // Function to check if current mapping satisfies the puzzle
-fn is_valid_solution(words: &[&str], result: &str, mapping: &[(char, u32)]) -> bool {
-    let sum: u32 = words.iter().map(|&word| word_to_number(word, mapping)).sum();
+fn is_valid_solution(words: &Vec<String>, result: &String, mapping: &[(char, u32)]) -> bool {
+    let sum: u32 = words.iter().map(|word| word_to_number(word.as_str(), mapping)).sum();
     sum == word_to_number(result, mapping)
 }
 
 // Function to generate permutations of digits and find a valid solution
-fn solve_crypto_arithmetic(words: &[&str], result: &str) -> Option<Vec<(char, u32)>> {
+fn solve_crypto_arithmetic(words: Vec<String>, result: String) -> Option<Vec<(char, u32)>> {
     let mut letters: HashSet<char> = HashSet::new();
-    for &word in words.iter().chain(std::iter::once(&result)) {
+    for word in words.iter().chain(std::iter::once(&result)) {
         for c in word.chars() {
             letters.insert(c);
         }
@@ -36,19 +65,38 @@ fn solve_crypto_arithmetic(words: &[&str], result: &str) -> Option<Vec<(char, u3
 
     for perm in permutations {
         let mapping: Vec<(char, u32)> = letters.iter().cloned().zip(perm).collect();
-        if is_valid_solution(words, result, &mapping) {
+        if is_valid_solution(&words, &result, &mapping) {
             return Some(mapping);
         }
     }
     None
 }
 
-fn main() {
-    let words: Vec<&str> = vec!["TWO", "TWO"];
-    let result: &str = "FOUR";
-    println!("{} + {} = {}", words[0], words[1], result);
+
+fn inputs() -> (Vec<String>, String) {
+    let input1: String = input!("Two Words as Input, Separated with Whitespace? ");
+    let words: Vec<String> = input1.split_whitespace().map(String::from).collect();
     
-    match solve_crypto_arithmetic(&words, result) {
+    let result: String = input!("Result String? ");
+    
+    (words, result)
+}
+
+use std::process::Command;
+fn cls() {
+    Command::new("cmd")
+        .args(&["/C", "cls"])
+        .status()
+        .unwrap();
+}
+
+fn main() {
+    cls();
+    let ( words, result) = inputs();
+
+    println!("{} + {} = {}", words[0], words[1], result);
+
+    match solve_crypto_arithmetic(words, result) {
         Some(mapping) => {
             // Extract characters and form a string
             let extracted_string: String = mapping.iter().map(|&(ch, _)| ch).collect();
