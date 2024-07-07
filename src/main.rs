@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::process::Command;
 use std::collections::HashSet;
 
 #[macro_export]
@@ -82,7 +83,6 @@ fn inputs() -> (Vec<String>, String) {
     (words, result)
 }
 
-use std::process::Command;
 fn cls() {
     Command::new("cmd")
         .args(&["/C", "cls"])
